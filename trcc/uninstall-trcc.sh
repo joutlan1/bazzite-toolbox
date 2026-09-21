@@ -1,10 +1,26 @@
 #!/usr/bin/env bash
+#
+# TRCC BAZZITE / LINUX CLEAN UNINSTALLER
+#
+# Removes the isolated TRCC installation created by install-trcc.sh,
+# including its GNOME autostart launcher and any old user-level systemd
+# service. It deliberately leaves system Python, Qt, PySide, and OS
+# packages untouched.
+#
+# Useful for:
+#   uninstall TRCC Bazzite
+#   remove trcc-linux
+#   remove Thermalright LCD Linux controller
+#   reset TRCC autostart GNOME
+#
+# Do NOT run this script with sudo.
 
 set -u
 
-echo "======================================"
-echo " TRCC Uninstaller"
-echo "======================================"
+echo "============================================================"
+echo " TRCC for Bazzite - Clean Uninstaller"
+echo " Removes TRCC without touching system Python / Qt / PySide"
+echo "============================================================"
 echo
 
 VENV="$HOME/.venvs/trcc"
@@ -14,7 +30,8 @@ SERVICE="$HOME/.config/systemd/user/trcc.service"
 
 if [[ "${EUID}" -eq 0 ]]; then
     echo "ERROR: Do not run this uninstaller with sudo."
-    echo "Run it as your normal desktop user:"
+    echo "Run it as the same desktop user that installed TRCC:"
+    echo
     echo "  ./uninstall-trcc.sh"
     exit 1
 fi
@@ -27,7 +44,7 @@ pkill -f "trcc gui" 2>/dev/null || true
 echo "Done."
 echo
 
-echo "[2/5] Removing GNOME autostart entry..."
+echo "[2/5] Removing GNOME/XDG autostart entry..."
 
 if [[ -f "$AUTOSTART" ]]; then
     rm -f "$AUTOSTART"
@@ -39,7 +56,7 @@ fi
 
 echo
 
-echo "[3/5] Removing TRCC startup launcher..."
+echo "[3/5] Removing delayed TRCC startup launcher..."
 
 if [[ -f "$LAUNCHER" ]]; then
     rm -f "$LAUNCHER"
@@ -51,7 +68,7 @@ fi
 
 echo
 
-echo "[4/5] Checking for old systemd TRCC service..."
+echo "[4/5] Checking for old user-level TRCC systemd service..."
 
 systemctl --user stop trcc.service 2>/dev/null || true
 systemctl --user disable trcc.service 2>/dev/null || true
@@ -66,7 +83,7 @@ fi
 
 echo
 
-echo "[5/5] Removing TRCC virtual environment..."
+echo "[5/5] Removing isolated TRCC virtual environment..."
 
 if [[ -d "$VENV" ]]; then
     rm -rf "$VENV"
@@ -77,12 +94,11 @@ else
 fi
 
 echo
-echo "======================================"
+echo "============================================================"
 echo " TRCC CLEANUP COMPLETE"
-echo "======================================"
+echo "============================================================"
 echo
-echo "The isolated TRCC installation, launcher,"
-echo "autostart entry, and old user service are gone."
+echo "TRCC, its isolated Python environment, delayed launcher,"
+echo "GNOME autostart entry, and old user service are gone."
 echo
-echo "No system Python packages or OS packages"
-echo "were removed."
+echo "System Python, Qt, PySide, and OS packages were left alone."
